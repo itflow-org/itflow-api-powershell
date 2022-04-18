@@ -20,16 +20,16 @@ function Is-Numeric ($Value) {
 # https://blog.darrenjrobinson.com/accessing-your-ubiquiti-unifi-network-configuration-with-powershell/
 
 # Unifi Controller Login Base URI
-$unfURL = ' ' # e.g 'https://192.168.1.2:8443'
+$unfURL = '' # e.g 'https://192.168.1.2:8443'
 
 # Identifier of the site in UniFi. Set to default for the default site
 $unfSiteID = "default"
 
 # UniFi Admin Username
-$unfUsername = ' '
+$unfUsername = ''
 
 # UniFi Password
-$unfPassword = ' '
+$unfPassword = ""
 
 $unfAuthBody = @{"username" = $unfUsername; "password" = $unfPassword }
 $unfHeaders = @{"Content-Type" = "application/json" }
@@ -45,7 +45,7 @@ $unfLogin = $null
 $itfBaseURL = 'http://127.0.0.1/itflow'
 
 # ITFlow API Key
-$itfAPIKey = 'pkNAjIpeNILa7StO'
+$itfAPIKey = 'De5sxSVMjWdS3QX4'
 
 # ITFlow Client ID (for adding assets)
 $itfClientID = '8'
@@ -109,12 +109,12 @@ foreach ($AP in $unfDevices.data) {
 
     if($itfAssetSN.success -eq "True"){
         $itfAssetID = $itfAssetSN.data.asset_id
-        $itfAssetData = $itfAssetSN
+        $itfAssetClientID = $itfAssetSN.data.asset_client_id
         #Write-Host -ForegroundColor Green $AP.Name "lookup success via SN. ITFlow ID" $itfAssetID
     }
     elseif($itfAssetName.success -eq "True"){
         $itfAssetID = $itfAssetName.data.asset_id
-        $itfAssetData = $itfAssetName
+        $itfAssetClientID = $itfAssetName.data.asset_client_id
         #Write-Host -ForegroundColor Green $AP.Name "lookup success via name. ITFlow ID:" $itfAssetID
     }
 
@@ -123,7 +123,7 @@ foreach ($AP in $unfDevices.data) {
     if(Is-Numeric $itfAssetID){
         # We found the asset - update details
 
-        Write-Host -ForegroundColor Green "Found asset" $AP.Name $AP.Serial "as ITFlow ID" $itfAssetID " - updating it.."
+        Write-Host -ForegroundColor Green "Found asset" $name $serial "as ITFlow ID" $itfAssetID " - updating it.."
 
         # Asset attributes to be updated
         $body = @"
@@ -137,7 +137,8 @@ foreach ($AP in $unfDevices.data) {
             "asset_serial" : "$serial",
             "asset_os" : "$os",
             "asset_ip" : "$ip",
-            "asset_mac" : "$mac"
+            "asset_mac" : "$mac",
+            "client_id" : "$itfAssetClientID"
         }
 "@ # This seemingly cannot be indented..
 
