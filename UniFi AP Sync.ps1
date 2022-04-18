@@ -26,7 +26,7 @@ $unfURL = ' ' # e.g 'https://192.168.1.2:8443'
 $unfSiteID = "default"
 
 # UniFi Admin Username
-$unfUsername = ' ' # yourAdmin UserID
+$unfUsername = ' '
 
 # UniFi Password
 $unfPassword = ' '
@@ -39,6 +39,7 @@ $unfLogin = $null
 
 #######################################################################################################
 # ITFlow Settings
+# https://itflow.org/docs.php?doc=api
 
 # ITFlow Base URL
 $itfBaseURL = 'http://127.0.0.1/itflow'
@@ -113,7 +114,7 @@ foreach ($AP in $unfDevices.data) {
     }
     elseif($itfAssetName.success -eq "True"){
         $itfAssetID = $itfAssetName.data.asset_id
-        $itfAssetData = $itfAssetSN
+        $itfAssetData = $itfAssetName
         #Write-Host -ForegroundColor Green $AP.Name "lookup success via name. ITFlow ID:" $itfAssetID
     }
 
