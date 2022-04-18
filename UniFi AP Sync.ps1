@@ -118,8 +118,9 @@ foreach ($AP in $unfDevices.data) {
     }
 
     # Check if asset already exists (if ITFlow knows about the AP)
+
     if(Is-Numeric $itfAssetID){
-        # We found the asset - update details?
+        # We found the asset - update details
 
         Write-Host -ForegroundColor Green "Found asset" $AP.Name $AP.Serial "as ITFlow ID" $itfAssetID " - updating it.."
 
@@ -146,7 +147,7 @@ foreach ($AP in $unfDevices.data) {
     }
 
     else{
-        # Couldn't find asset
+        # Couldn't find asset, add it
 
         Write-Host -ForegroundColor Yellow "Could not find asset" $AP.Name $AP.Serial "- adding it.."
 
@@ -166,6 +167,7 @@ foreach ($AP in $unfDevices.data) {
             "client_id" : "$itfClientID"
         }
 "@ # This seemingly cannot be indented..
+
 
         # Add asset
         Invoke-RestMethod -Method Post -Uri $itfCreateURL -Body $body
