@@ -33,10 +33,10 @@ $hypHost = ' ';
 $itfBaseURL = 'http://127.0.0.1/itflow'
 
 # ITFlow API Key
-$itfAPIKey = 'De5sxSVMjWdS3QX4'
+$itfAPIKey = ' '
 
 # ITFlow Client ID (for adding assets)
-$itfClientID = '8'
+$itfClientID = ' '
 
 
 $itfReadURL = $itfBaseURL + "/api/v1/assets/read.php?api_key=" + $itfAPIKey
