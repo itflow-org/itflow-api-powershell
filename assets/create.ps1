@@ -10,7 +10,6 @@ $apiKey = "a1wEoh1F3omPhea6"
 $siteUrl = "https://demo.itflow.org"
 
 # Data
-# All attributes must be specified, even if left blank
 $body = @"
 {
     "api_key" : "$apiKey",
