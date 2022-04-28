@@ -29,7 +29,6 @@ $body = @"
     "asset_warranty_expire" : "2024-02-01",
     "asset_install_date" : "",
     "asset_notes" : "This is a cool laptop!",
-    "asset_meshcentral_id" : "",
     "asset_vendor_id" : "",
     "asset_location_id" : "",
     "asset_contact_id" : "",
