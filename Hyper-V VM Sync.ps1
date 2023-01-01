@@ -85,7 +85,7 @@ foreach ($VM in $VMs) {
         $itfAssetID = $itfAssetName.data.asset_id
     }
 
-    # Check if asset already exists (if ITFlow knows about the AP)
+    # Check if asset already exists (if ITFlow knows about the VM)
 
     if(Is-Numeric $itfAssetID){
         # We found the asset - update details
