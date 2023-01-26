@@ -1,7 +1,7 @@
-﻿# ITFlow API - PowerShell examples
+# ITFlow API - PowerShell examples
 # https://itflow.org
 
-# Create contact(s)
+# Update contact(s)
 
 # API Key
 $apiKey = "05438411f4fd492f"
@@ -13,14 +13,15 @@ $siteUrl = "https://demo.itflow.org"
 $body = @"
 {
     "api_key" : "$apiKey",
-    "contact_name" : "Sally Suzie",
+    "contact_id" : "48",
+    "contact_name" : "Suzanne Sallie",
     "contact_title" : "Head of Accounting",
     "contact_department" : "Accounts",
     "contact_email" : "sally@itflow.org",
-    "contact_phone" : "123456",
+    "contact_phone" : "1234567",
     "contact_extension" : "",
     "contact_mobile" : "",
-    "contact_notes" : "We like Sally - she pays us!",
+    "contact_notes" : "We like Suzanne - she pays us (a lot)!",
     "contact_auth_method" : "local",
     "contact_important" : "1",
     "contact_billing" : "1",
@@ -31,7 +32,7 @@ $body = @"
 "@
 
 # Module / Endpoint
-$module = "/api/v1/contacts/create.php"
+$module = "/api/v1/contacts/update.php"
 
 # Build URI from defined data
 $uri = $siteUrl + $module
