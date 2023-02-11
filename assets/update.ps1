@@ -25,6 +25,7 @@ $body = @"
     "asset_os" : "Windows 10",
     "asset_ip" : "192.168.10.10",
     "asset_mac" : "",
+    "asset_status" : "Deployed",
     "asset_purchase_date" : "",
     "asset_warranty_expire" : "2024-02-01",
     "asset_install_date" : "",
