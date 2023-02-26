@@ -21,7 +21,7 @@
     ·
     <a href="https://github.com/itflow-org/itflow/issues">Report Bug</a>
     ·
-    <a href="https://forum.itflow.org/t/features">Suggest Feature</a>
+    <a href="https://forum.itflow.org/t/features">Request Feature</a>
   </p>
 </div>
 
