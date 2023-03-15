@@ -1,30 +1,33 @@
 <#
 .SYNOPSIS
-    Create or update asset from Tactical RMM to ITFlow. Uses PC serial number to check if asset exists in ITFlow.
+    Create or update asset from Tactical RMM to ITFlow. Uses PC serial to check if asset exists in ITFlow.
 
 .REQUIREMENTS
     - ITFlow API key.
     - Global key in TacticalRMM named "ITFlow_API" with your ITFlow API key as the value.
     - Global key in TacticalRMM named "ITFlow_url" with your ITFlow URL as the value.
     - Client custom field in TacticalRMM named "ITFlow_client_ID".
-    - Each client in TacticalRMM should have its ITFlow_client_ID populated with the client_id found in ITFlow. (To find the id, check the URL in ITFlow once you select a client)
+    - Each client in TacticalRMM should have its ITFlow_client_ID populated with the client_id found in ITFlow.
+        (To find the id, check the URL in ITFlow once you select a client)
 
 .NOTES
-    - Uses PC serial number to check if asset exists in ITFlow. Make sure to add the below script arguments to the script arguments section in TacticalRMM. This script can be adapted to any RMM. TacticalRMM is only used to store the ITFlow URL, ITFlow API key, and client IDs. 
+    - Uses PC serial number to check if asset exists in ITFlow.
+    - Make sure to add the below script arguments to the script arguments section in TacticalRMM.
+    - This script can be adapted to any RMM. TacticalRMM is only used to store the ITFlow URL, ITFlow API key, and client IDs. 
 
 .SCRIPT_ARGUMENTS
-    -ITFlow_API 
-    -ITFlow_url 
-    -ITFlow_client_ID 
+    -ITFlow_API {{global.ITFlow_API}}
+    -ITFlow_url {{global.ITFlow_url}}
+    -ITFlow_client_ID {{client.ITFlow_client_ID}}
 
 .TODO
     - Error flags
     
 .VERSION
+    - v1.1 Added verbosity, forced TLS 1.2, added exit if API read failure
     - v1.0 Initial Release
      
 #>
-
 
 param(
     [string] $ITFlow_API,
@@ -56,25 +59,29 @@ function Test-IsServer {
     $osInfo -ne 1
 }
 
-    # If asset is server os, type is server. Otherwise, if chasis is mobile, type is laptop. Otherwise, type is desktop.
-    if (Test-IsServer) { $asset_type = "Server" }
-    else
-    {if (Test-IsLaptop) { $asset_type = "Laptop" } 
-    else
-    { $asset_type = "Desktop" }}
+# If asset is server os, type is server. Otherwise, if chasis is mobile, type is laptop. Otherwise, type is desktop.
+if (Test-IsServer) {
+    $asset_type = "Server"
+} else {
+    if (Test-IsLaptop) {
+    $asset_type = "Laptop"
+    } else {
+    $asset_type = "Desktop"
+    }
+}
 
-    
-
-
-# Read Module / Endpoint
+# Read Module
 $read_module = "/api/v1/assets/read.php"
 
 # Search all clients in ITFlow by serial to see if this asset already exists
 $uri_read = $ITFlow_url + $read_module + "?api_key=" + $ITFlow_API + "&asset_serial=" + $agent_serial
 
-# Request
-$obj0 = Invoke-RestMethod -Method GET -Uri $uri_read
-$asset_id = $obj0.data.asset_id
+# Force TLS 1.2 for this script
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# Check if PC exists in ITFlow database
+$exists = Invoke-RestMethod -Method GET -Uri $uri_read
+$asset_id = $exists.data.asset_id
 
 # Data
 $body = @"
@@ -96,22 +103,33 @@ $body = @"
 "@
 
 # If the asset exists update it, if not create it.
-if ($obj0.success -eq "False"){
+if ($exists.success -eq "False") {
     $module = "/api/v1/assets/create.php"
-    Write-Host "Asset does not exist - Creating"
-    
-    }else{
-    
-    $module = "/api/v1/assets/update.php"
-    Write-Host "Asset already exists - Updating"
+    Write-Host "Asset does not exist - Creating..."
+} else {
+    if ($exists.success -eq "True") {
+        $module = "/api/v1/assets/update.php"
+        Write-Host "Asset already exists - Updating..."
+    } else {
+        Write-Host "API connection error. Aborting..."
+        Exit
     }
+}
 
 $uri_write = $ITFlow_url + $module
-$obj1 = Invoke-RestMethod -Method Post -Uri $uri_write -Body $body
+$write = Invoke-RestMethod -Method Post -Uri $uri_write -Body $body
 
-if ($obj0.success -eq "True")
-    { if ($obj1.success -eq "True"){ Write-Host "Asset pdated" }
-    else { Write-Host "No changes to update" }}
-else
-    { if ($obj1.success -eq "True"){ Write-Host "Asset created" }
-    else { Write-Host "Failed to create asset" }}
+if ($exists.success -eq "True" -And $write.success -eq "True") {
+    Write-Host "Asset updated."
+}
+    
+if ($exists.success -eq "True" -And $write.success -eq "False") {
+    Write-Host "No changes to update." 
+}
+
+if ($exists.success -eq "False" -And $write.success -eq "True") {
+    Write-Host "Asset created." 
+}
+if ($exists.success -eq "False" -And $write.success -eq "False") {
+    Write-Host "Failed to create asset."
+}
