@@ -1,17 +1,21 @@
 <#
 .SYNOPSIS
-    Create or update asset from Tactical RMM to ITFlow. Uses PC serial to check if asset exists in ITFlow.
+    Create or update asset from Tactical RMM to ITFlow. Uses MAC address to check if asset exists in ITFlow.
 
 .REQUIREMENTS
     - ITFlow API key.
     - Global key in TacticalRMM named "ITFlow_API" with your ITFlow API key as the value.
     - Global key in TacticalRMM named "ITFlow_url" with your ITFlow URL as the value.
     - Client custom field in TacticalRMM named "ITFlow_client_ID".
+    - Site custom field in TacticalRMM named "ITFlow_location_ID"
+    - Site custom field in TacticalRMM named "ITFlow_network_ID"
     - Each client in TacticalRMM should have its ITFlow_client_ID populated with the client_id found in ITFlow.
-        (To find the id, check the URL in ITFlow once you select a client)
+        To find the ID, check the URL in ITFlow once you select a client.
+    - Each client site in TacticalRMM should have ITFlow_location_ID and ITFlow_network_ID populated with the IDs.
+        To find the IDs run this script on one PC. Assign the PC to a location and network in ITFlow. Run this script again and take note of the location and network IDs.
 
 .NOTES
-    - Uses PC serial number to check if asset exists in ITFlow.
+    - Uses PC MAC address to check if asset exists in ITFlow.
     - Make sure to add the below script arguments to the script arguments section in TacticalRMM.
     - This script can be adapted to any RMM. TacticalRMM is only used to store the ITFlow URL, ITFlow API key, and client IDs. 
 
@@ -19,11 +23,11 @@
     -ITFlow_API {{global.ITFlow_API}}
     -ITFlow_url {{global.ITFlow_url}}
     -ITFlow_client_ID {{client.ITFlow_client_ID}}
+    -ITFlow_location_ID {{site.ITFlow_location_ID}}
+    -ITFlow_network_ID {{site.ITFlow_network_ID}}
 
-.TODO
-    - Error flags
-    
 .VERSION
+    - v1.2 Changed search from serial to MAC address, added location ID and network ID
     - v1.1 Added verbosity, forced TLS 1.2, added exit if API read failure
     - v1.0 Initial Release
      
@@ -32,14 +36,16 @@
 param(
     [string] $ITFlow_API,
     [string] $ITFlow_url,
-    [string] $ITFlow_client_ID
+    [string] $ITFlow_client_ID,
+    [string] $ITFlow_location_ID,
+    [string] $ITFlow_network_ID
 )
 
     # Get PC info
     $asset_name = $Env:ComputerName
-    $agent_make = (Get-WmiObject -Class:Win32_ComputerSystem).Manufacturer
-    $agent_model = (Get-WmiObject -Class:Win32_ComputerSystem).Model
-    $agent_serial = (Get-WmiObject -Class:Win32_BIOS).SerialNumber
+    $asset_make = (Get-WmiObject -Class:Win32_ComputerSystem).Manufacturer
+    $asset_model = (Get-WmiObject -Class:Win32_ComputerSystem).Model
+    $asset_serial = (Get-WmiObject -Class:Win32_BIOS).SerialNumber
     $asset_os = (Get-WmiObject Win32_OperatingSystem).Caption
     $asset_mac = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DHCPEnabled -ne $null -and $_.DefaultIPGateway -ne $null}).macaddress | Select-Object -First 1
     $install = ([DateTime](Get-Item -Force 'C:\System Volume Information\').CreationTime).ToString('yyyy/MM/dd')
@@ -74,33 +80,17 @@ if (Test-IsServer) {
 $read_module = "/api/v1/assets/read.php"
 
 # Search all clients in ITFlow by serial to see if this asset already exists
-$uri_read = $ITFlow_url + $read_module + "?api_key=" + $ITFlow_API + "&asset_serial=" + $agent_serial
+$uri_read = $ITFlow_url + $read_module + "?api_key=" + $ITFlow_API + "&asset_mac=" + $asset_mac
 
 # Force TLS 1.2 for this script
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 # Check if PC exists in ITFlow database
 $exists = Invoke-RestMethod -Method GET -Uri $uri_read
-$asset_id = $exists.data.asset_id
 
-# Data
-$body = @"
-{
-    "api_key" : "$ITFlow_API",
-    "asset_name" : "$asset_name",
-    "asset_type" : "$asset_type",
-    "asset_make" : "$agent_make",
-    "asset_model" : "$agent_model",
-    "asset_serial" : "$agent_serial",
-    "asset_os" : "$asset_os",
-    "asset_ip" : "$local_ip",
-    "asset_mac" : "$asset_mac",
-    "asset_install_date" : "$install",
-    "asset_status" : "Deployed",
-    "client_id" : "$ITFlow_client_ID",
-    "asset_id" : "$asset_id"
-}
-"@
+$asset_id = $exists.data.asset_id
+$asset_location_id = $ITFlow_location_ID
+$asset_network_id = $ITFlow_network_ID
 
 # If the asset exists update it, if not create it.
 if ($exists.success -eq "False") {
@@ -109,12 +99,43 @@ if ($exists.success -eq "False") {
 } else {
     if ($exists.success -eq "True") {
         $module = "/api/v1/assets/update.php"
+        Write-Host "ITFlow IDs - Location ID: " $exists.data.asset_location_id "Network ID: " $exists.data.asset_network_id
+        
+        if ( $ITFlow_location_ID -eq "0" ) {
+            $asset_location_id = $exists.data.asset_location_id
+        }
+
+        if ( $ITFlow_network_ID -eq "0" ) {
+            $asset_network_id = $exists.data.asset_network_id
+        }
+        
         Write-Host "Asset already exists - Updating..."
     } else {
         Write-Host "API connection error. Aborting..."
         Exit
     }
 }
+
+# Data
+$body = @"
+{
+    "api_key"               : "$ITFlow_API",
+    "asset_name"            : "$asset_name",
+    "asset_type"            : "$asset_type",
+    "asset_make"            : "$assent_make",
+    "asset_model"           : "$asset_model",
+    "asset_serial"          : "$asset_serial",
+    "asset_os"              : "$asset_os",
+    "asset_ip"              : "$local_ip",
+    "asset_mac"             : "$asset_mac",
+    "asset_install_date"    : "$install",
+    "asset_status"          : "Deployed",
+    "client_id"             : "$ITFlow_client_ID",
+    "asset_location_id"     : "$asset_location_id",
+    "asset_network_id"      : "$asset_network_id",
+    "asset_id"              : "$asset_id"
+}
+"@
 
 $uri_write = $ITFlow_url + $module
 $write = Invoke-RestMethod -Method Post -Uri $uri_write -Body $body
