@@ -14,7 +14,7 @@ $module = "/api/v1/contacts/read.php"
 
 # Build URI from defined data
 # Will return all contacts by default (single client/all clients depends on API key scope)
-#$uri = $siteUrl + $module + "?api_key=" + $apiKey
+$uri = $siteUrl + $module + "?api_key=" + $apiKey
 
 
 # Other URL examples
