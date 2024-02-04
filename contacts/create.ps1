@@ -38,4 +38,4 @@ $uri = $siteUrl + $module
 
 # Request
 # Use Invoke-WebRequest instead to see more info about the request/response
-Invoke-RestMethod -Method Post -Uri $uri -Body $body -ErrorVariable $a
+Invoke-RestMethod -Method Post -Uri $uri -Body $body
