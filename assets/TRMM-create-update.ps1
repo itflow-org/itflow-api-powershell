@@ -27,6 +27,7 @@
     -ITFlow_network_ID {{site.ITFlow_network_ID}}
 
 .VERSION
+    - v1.3 - 2024-06-12 - JQ - Fixed asset_make spelling, Remove Inc. from Make string, remove Microsoft from OS String, Capitalize First letter of each word in Make String, except for HP capitize both letters.
     - v1.2 Changed search from serial to MAC address, added location ID and network ID
     - v1.1 Added verbosity, forced TLS 1.2, added exit if API read failure
     - v1.0 Initial Release
@@ -41,15 +42,37 @@ param(
     [string] $ITFlow_network_ID
 )
 
-    # Get PC info
-    $asset_name = $Env:ComputerName
-    $asset_make = (Get-WmiObject -Class:Win32_ComputerSystem).Manufacturer
-    $asset_model = (Get-WmiObject -Class:Win32_ComputerSystem).Model
-    $asset_serial = (Get-WmiObject -Class:Win32_BIOS).SerialNumber
-    $asset_os = (Get-WmiObject Win32_OperatingSystem).Caption
-    $asset_mac = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DHCPEnabled -ne $null -and $_.DefaultIPGateway -ne $null}).macaddress | Select-Object -First 1
-    $install = ([DateTime](Get-Item -Force 'C:\System Volume Information\').CreationTime).ToString('yyyy/MM/dd')
-    $local_ip = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DHCPEnabled -ne $null -and $_.DefaultIPGateway -ne $null}).IPAddress | Select-Object -First 1
+# Function to capitalize the first letter of each word and handle specific cases
+function Capitalize-FirstLetter {
+    param (
+        [string]$inputString
+    )
+    if ($inputString -eq "hp") {
+        return "HP"
+    } elseif ($inputString -eq "ibm") {
+        return "IBM"
+    } else {
+        return ($inputString -split ' ' | ForEach-Object { 
+            if ($_.Length -gt 1) { 
+                $_.Substring(0,1).ToUpper() + $_.Substring(1).ToLower() 
+            } else { 
+                $_.ToUpper() 
+            } 
+        }) -join ' '
+    }
+}
+
+# Get PC info
+$asset_name = $Env:ComputerName
+$asset_make = (Get-WmiObject -Class Win32_ComputerSystem).Manufacturer
+$asset_make = $asset_make -replace 'Inc\.', '' -replace 'inc\.', '' -replace 'Inc', '' -replace 'inc', ''
+$asset_make = Capitalize-FirstLetter -inputString $asset_make
+$asset_model = (Get-WmiObject -Class:Win32_ComputerSystem).Model
+$asset_serial = (Get-WmiObject -Class:Win32_BIOS).SerialNumber
+$asset_os = (Get-WmiObject Win32_OperatingSystem).Caption -replace 'Microsoft', ''
+$asset_mac = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DHCPEnabled -ne $null -and $_.DefaultIPGateway -ne $null}).macaddress | Select-Object -First 1
+$install = ([DateTime](Get-Item -Force 'C:\System Volume Information\').CreationTime).ToString('yyyy/MM/dd')
+$local_ip = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DHCPEnabled -ne $null -and $_.DefaultIPGateway -ne $null}).IPAddress | Select-Object -First 1
     
 # Check if laptop
 function Test-IsLaptop {
@@ -122,7 +145,7 @@ $body = @"
     "api_key"               : "$ITFlow_API",
     "asset_name"            : "$asset_name",
     "asset_type"            : "$asset_type",
-    "asset_make"            : "$assent_make",
+    "asset_make"            : "$asset_make",
     "asset_model"           : "$asset_model",
     "asset_serial"          : "$asset_serial",
     "asset_os"              : "$asset_os",
