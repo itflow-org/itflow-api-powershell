@@ -2,6 +2,8 @@
 # https://itflow.org
 
 # Read credentials (originally called "logins")
+# Warning: Anyone in possession of the API Key & Decryption key can decrypt all credentials/logins via the API. 
+#  Whilst running this script directly on user endpoints is convenient, consider how you will keep the keys safe from compromise.
 
 # API Key
 $apiKey = "a1wEoh1F3omPhea6"
