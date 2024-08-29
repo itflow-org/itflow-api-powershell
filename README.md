@@ -13,13 +13,13 @@
     Username: <b>demo@demo</b> | Password: <b>demo</b>
     <br />
     <br />
-    <a href="https://itflow.org/index.php?page=About">About</a>
+    <a href="https://itflow.org/#about">About</a>
     ·
-    <a href="https://itflow.org/docs.php">Docs</a>
+    <a href="https://docs.itflow.org">Docs</a>
     ·
     <a href="https://forum.itflow.org/">Forum</a>
     ·
-    <a href="https://github.com/itflow-org/itflow/issues">Report Bug</a>
+    <a href="https://forum.itflow.org/t/bug">Report Bug</a>
     ·
     <a href="https://forum.itflow.org/t/features">Request Feature</a>
   </p>
