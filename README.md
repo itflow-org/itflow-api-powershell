@@ -22,6 +22,8 @@
     <a href="https://forum.itflow.org/t/bug">Report Bug</a>
     ·
     <a href="https://forum.itflow.org/t/features">Request Feature</a>
+    ·
+    <a href="https://github.com/itflow-org/itflow/security/policy">Security</a>
   </p>
 </div>
 
