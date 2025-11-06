@@ -20,6 +20,7 @@ $body = @"
     "client_rate" : "250",
     "client_currency_code" : "USD",
     "client_net_terms" : "30",
+    "client_abbreviation" : "CTS",
     "client_tax_id_number" : "987654321Z",
     "client_is_lead" : "0",
     "client_notes" : "New client"
