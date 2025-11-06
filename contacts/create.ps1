@@ -22,6 +22,7 @@ $body = @"
     "contact_mobile" : "",
     "contact_notes" : "We like Sally - she pays us!",
     "contact_auth_method" : "local",
+    "contact_primary" : "0",
     "contact_important" : "1",
     "contact_billing" : "1",
     "contact_technical" : "0",
