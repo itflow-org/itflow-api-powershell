@@ -18,12 +18,12 @@ $siteUrl = "https://demo.itflow.org"
 $module = "/api/v1/credentials/read.php"
 
 # Build URI from defined data
-# Will return all assets by default (single client/all clients depends on API key scope)
+# Will return all credentials by default (single client/all clients depends on API key scope)
 $uri = $siteUrl + $module + "?api_key=" + $apiKey + "&api_key_decrypt_password=" + $credKey
 
 # Another URL example: Specific credential/login ID
 #$uri = $siteUrl + $module + "?api_key=" + $apiKey + "&api_key_decrypt_password=" + $credKey + "&login_id=7"
 
 # Request
-# Use Invoke-WebMethod instead to see more info about the request/response
+# Use Invoke-WebRequest instead to see more info about the request/response
 $a = Invoke-RestMethod -Method GET -Uri $uri
