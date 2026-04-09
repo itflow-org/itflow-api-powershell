@@ -26,4 +26,4 @@ $uri = $siteUrl + $module + "?api_key=" + $apiKey + "&api_key_decrypt_password="
 
 # Request
 # Use Invoke-WebRequest instead to see more info about the request/response
-$a = Invoke-RestMethod -Method GET -Uri $uri
+Invoke-RestMethod -Method GET -Uri $uri
