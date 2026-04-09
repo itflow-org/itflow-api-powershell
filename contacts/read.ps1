@@ -31,7 +31,6 @@ $uri = $siteUrl + $module + "?api_key=" + $apiKey
 # Specific contact ID
 # $uri = $siteUrl + $module + "?api_key=" + $apiKey + "&contact_id=22"
 
-
 # Request
-# Use Invoke-WebMethod instead to see more info about the request/response
+# Use Invoke-WebRequest instead to see more info about the request/response
 Invoke-RestMethod -Method GET -Uri $uri
