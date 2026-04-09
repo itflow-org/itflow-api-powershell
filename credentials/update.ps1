@@ -19,9 +19,9 @@ $body = @"
 {
     "api_key" : "$apiKey",
     "api_key_decrypt_password" : "$credKey",
-    "login_id" : "6",
-    "login_username" : "new_username",
-    "login_password" : "changedPassword-123",
+    "credential_id" : "6",
+    "credential_username" : "new_username",
+    "credential_password" : "changedPassword-123",
     "client_id" : "1"
 }
 "@
