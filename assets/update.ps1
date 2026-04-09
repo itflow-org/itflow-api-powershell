@@ -13,6 +13,7 @@ $siteUrl = "https://demo.itflow.org"
 # Unspecified values will not be modified
 # Client ID is required if the API key used has scope/access to all clients 
 #  (ensure to remove trailing comma from network id if removing).
+# Status should ideally be an existing value per Admin Settings > Categories > Asset Status, or will break UI modal
 $body = @"
 {
     "api_key" : "$apiKey",
