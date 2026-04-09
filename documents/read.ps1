@@ -13,7 +13,7 @@ $siteUrl = "https://demo.itflow.org"
 $module = "/api/v1/documents/read.php"
 
 # Build URI from defined data
-# Will return all assets by default (single client/all clients depends on API key scope)
+# Will return all docs by default (single client/all clients depends on API key scope)
 $uri = $siteUrl + $module + "?api_key=" + $apiKey
 
 
